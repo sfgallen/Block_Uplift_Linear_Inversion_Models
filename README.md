@@ -12,7 +12,7 @@ The codes in the “nondimensional_block_uplift” folder follow Goren et al.’
 
 The codes in the “dimensional_block_uplift” folder require an input erodibility, K, parameter to convert chi to the river response time, tau and derive uplift rates in natural units.
 
-Both master functions have help menus, and users are directed to Goren et al. (2014) and Gallen (2018) for details on the methodology and example applications.
+Both master functions have help menus, and users are directed to Goren et al. (2014), Gallen (2018), and Pavano and Gallen (in review) for details on the methodology and example applications. Please cite the above mentioned studies if these codes are used for research.
 
 Contact:
 sean.gallen[at]colostate[dot]edu
@@ -22,5 +22,7 @@ sean.gallen[at]colostate[dot]edu
 Gallen, S.F., 2018. Lithologic controls on landscape dynamics and aquatic species evolution in post-orogenic mountains. Earth and Planetary Science Letters, 493, pp.150-160.
 
 Goren, L., Fox, M. and Willett, S.D., 2014. Tectonics from fluvial topography using formal linear inversion: Theory and applications to the Inyo Mountains, California. Journal of Geophysical Research: Earth Surface, 119(8), pp.1651-1681.
+
+Pavano and Gallen, in review. A Geomorphic Examination of the Calabrian Forearc Translation: for consideration in Tectonics.
 
 Whipple, K.X. and Tucker, G.E., 1999. Dynamics of the stream‐power river incision model: Implications for height limits of mountain ranges, landscape response timescales, and research needs. Journal of Geophysical Research: Solid Earth, 104(B8), pp.17661-17674.
