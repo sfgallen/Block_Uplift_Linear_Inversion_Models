@@ -11,6 +11,6 @@ DEM = load('DEM_ws_1.mat');
 DEM = DEM.tDEM;
 
 % invert streams with a K
-K = 1e-5;
-tau_inc = 6e4;
-[A,U,S,Stau] = linear_inversion_block_uplift_erodibility(DEM,K,tau_inc);
+K = 5e-6;
+tau_inc = 1e5;
+[A,U,S,Stau,tau_steps] = linear_inversion_block_uplift_erodibility(DEM,K,tau_inc);

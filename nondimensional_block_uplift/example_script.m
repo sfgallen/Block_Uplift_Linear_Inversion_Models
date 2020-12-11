@@ -11,5 +11,13 @@ DEM = load('DEM_ws_1.mat');
 DEM = DEM.tDEM;
 
 % invert streams
-[A,Umod,S,Schi] = linear_inversion_block_uplift(DEM,'n_inc',20);
+[A,Umod,S,Schi,chi_steps] = linear_inversion_block_uplift(DEM,'n_inc',10);
 
+% example of how to convert from nondimentional to natural units and plot
+K = 5e-6;
+Ao = 1;
+m = 0.45;
+
+figure(99)
+stairs(chi_steps./(K*Ao^m)./1e6,Umod.*(K*Ao^m).*1000);
+xlabel('\tau (Myr)'); ylabel('Uplift rate (mm/yr)');

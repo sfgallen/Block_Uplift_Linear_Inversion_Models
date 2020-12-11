@@ -1,4 +1,4 @@
-function [A,Umod,S,Schi] = linear_inversion_block_uplift(DEM,varargin)
+function [A,Umod,S,Schi,chi_steps] = linear_inversion_block_uplift(DEM,varargin)
 % Block uplift inversion code after Goren et al. (2014) JGR-Earth Surface.
 % Inputs:
 %       (1) DEM clipped to a watershed as a TopoToolbox GRIDobj
@@ -19,9 +19,10 @@ function [A,Umod,S,Schi] = linear_inversion_block_uplift(DEM,varargin)
 %       (2) Umod - recovered uplift history
 %       (3) S - topotoolbox STREAMobj
 %       (4) Schi - chi of the stream network
+%       (5) chi_steps - increments of chi used in inversion
 %
 % Author: Sean F. Gallen
-% Date Modified: 03/10/2020
+% Date Modified: 12/11/2020
 % email: sean.gallen[at]colostate.edu
 
 %%Parse Inputs

@@ -1,10 +1,10 @@
-function [A,Umod,S,Stau] = linear_inversion_block_uplift_erodibility(DEM,K, tau_inc,varargin)
+function [A,Umod,S,Stau,tau_steps] = linear_inversion_block_uplift_erodibility(DEM,K, tau_inc,varargin)
 % Block uplift inversion code after Goren et al. (2014) JGR-Earth Surface.
 % Inputs:
 %       Required:
 %       (1) DEM clipped to a watershed as a TopoToolbox GRIDobj
 %       (2) Erodibility constant, K, calculated assuming n = 1
-%       (3) Tau increment in years.
+%       (3) Tau increment in years (divides network into even tau incs)
 %
 %       Optional:
 %       (3) crita - critical drainage area for channel head initiation in
@@ -17,12 +17,13 @@ function [A,Umod,S,Stau] = linear_inversion_block_uplift_erodibility(DEM,K, tau_
 %
 % Outputs:
 %       (1) A - forward model matrix
-%       (2) Umod - recovered uplift history
+%       (2) Umod - recovered uplift history in m/yr
 %       (3) S - topotoolbox STREAMobj
-%       (4) Schi - chi of the stream network
+%       (4) Stau - tau of the stream network in yrs
+%       (5) tau_steps - increments of chi used in inversion in yrs
 %
 % Author: Sean F. Gallen
-% Date Modified: 03/30/2020
+% Date Modified: 12/11/2020
 % email: sean.gallen[at]colostate.edu
 
 %%Parse Inputs
@@ -133,15 +134,14 @@ subplot(2,2,1)
 for i = 1:length(Gam)
     % now we can invert to find U following Goren from Tarantola, 1987
     Umod = Upri + (A'*A + Gam(i)^2*I)\A'*(z_vec-A*Upri);
-%     subplot(2,1,1);
-%     stairs(chi_steps,Umod,'color',cols(i,:),'lineWidth',0.5); hold on
+    
     MisFit(i) = (1/(n-q))*sqrt(sum((z_vec - A*Umod).^2));
     %subplot(2,1,2)
     plot(1./Gam(i),MisFit(i),'.','color',cols(i,:)); hold on
 end
 
 [ind,~] = turingPointFinder(1./Gam,MisFit);
-%subplot(2,1,2)
+
 plot(1/Gam(ind),MisFit(ind),'ko','markerfacecolor',[0.5 0.5 0.5]);
 xlabel('1/\Gamma'); ylabel('normalized misfit');
 
