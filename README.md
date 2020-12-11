@@ -8,6 +8,8 @@ E = K*A^m*S^n
 
 where m and n are positive constants.
 
+The codes rely on Matlab-based TopoToolbox (Schwanghart and Scherler, 2014; https://topotoolbox.wordpress.com/) to analyze a digital elevation model and define the stream network.
+
 Both sets of codes assume that n = 1 and the m/n ratio is 0.5 unless otherwise defined by the user.
 
 The codes in the “nondimensional_block_uplift” folder follow Goren et al.’s approach to using the transport distance variable chi and river network elevations to derive a “nondimensional uplift” term (note if a reference drainage area of 1 m^2 is used, this is the average normalized steepness index (ksn) per unit chi).
@@ -26,5 +28,7 @@ Gallen, S.F., 2018. Lithologic controls on landscape dynamics and aquatic specie
 Goren, L., Fox, M. and Willett, S.D., 2014. Tectonics from fluvial topography using formal linear inversion: Theory and applications to the Inyo Mountains, California. Journal of Geophysical Research: Earth Surface, 119(8), pp.1651-1681.
 
 Pavano and Gallen, in review. A Geomorphic Examination of the Calabrian Forearc Translation: for consideration in Tectonics.
+
+Schwanghart, W. and Scherler, D., 2014. TopoToolbox 2–MATLAB-based software for topographic analysis and modeling in Earth surface sciences. Earth Surface Dynamics, 2(1), pp.1-7.
 
 Whipple, K.X. and Tucker, G.E., 1999. Dynamics of the stream‐power river incision model: Implications for height limits of mountain ranges, landscape response timescales, and research needs. Journal of Geophysical Research: Solid Earth, 104(B8), pp.17661-17674.
