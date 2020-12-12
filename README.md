@@ -14,7 +14,7 @@ Both sets of codes assume that n = 1 and the m/n ratio is 0.5 unless otherwise d
 
 The codes in the “nondimensional_block_uplift” folder follow Goren et al.’s approach to using the transport distance variable chi and river network elevations to derive a “nondimensional uplift” term (note if a reference drainage area of 1 m^2 is used, this is the average normalized steepness index (ksn) per unit chi).
 
-The codes in the “dimensional_block_uplift” folder require an input erodibility, K, parameter to convert chi to the river response time, tau and derive uplift rates in natural units.
+The codes in the “dimensional_block_uplift” folder require an input erodibility, K, parameter to convert chi to the river response time, tau, and derive uplift rates in natural units.
 
 Both master functions have help menus, and users are directed to Goren et al. (2014), Gallen (2018), and Pavano and Gallen (in review) for details on the methodology and example applications. Please cite the above mentioned studies if these codes are used for research.
 
