@@ -2,7 +2,7 @@
 
 ## Author: Sean F. Gallen, 2020. [![DOI](https://zenodo.org/badge/314364091.svg)](https://zenodo.org/badge/latestdoi/314364091)
 
-This repository contains two codes that preform different versions of the linear river profile inversion method described in Goren et al. (2014) for spatially uniform, temporally varying (block) uplift assuming uniform erodibility. The method relies on the detachment-limited stream power equation (e.g. Whipple and Tucker, 1999) that describes incision into bedrock, E, as power functions of local channel slope, S, and upstream contributing drainage area, A as:
+This repository contains two codes that perform different versions of the linear river profile inversion described in Goren et al. (2014) for spatially uniform, temporally varying (block) uplift assuming uniform erodibility. The method relies on the detachment-limited stream power equation (e.g. Whipple and Tucker, 1999) that describes incision into bedrock, E, as power functions of local channel slope, S, and upstream contributing drainage area, A as:
 
 E = K*A^m*S^n
 
