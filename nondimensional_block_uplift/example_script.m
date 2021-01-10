@@ -3,7 +3,7 @@ clear
 clc
 
 % add path to topotoolbox folder
-addpath(genpath('C:\Users\sfgallen\Documents\topo_toolbox\topotoolbox-2.2'));
+addpath(genpath('C:\Users\sfgallen\Documents\topo_toolbox\topotoolbox-master'));
 
 %% Load a DEM as a topotoolbox GRIDobj
 % load clipped watershed-scale DEM as a gridobj
@@ -16,8 +16,8 @@ DEM = DEM.tDEM;
 % example of how to convert from nondimentional to natural units and plot
 K = 5e-6;
 Ao = 1;
-m = 0.45;
+mn = 0.5;
 
 figure(99)
-stairs(chi_steps./(K*Ao^m)./1e6,Umod.*(K*Ao^m).*1000);
+stairs(chi_steps./(K*Ao^mn)./1e6,Umod.*(K*Ao^mn).*1000);
 xlabel('\tau (Myr)'); ylabel('Uplift rate (mm/yr)');

@@ -27,7 +27,15 @@ DB = drainagebasins(FD,Sout);
 DEM.Z(DB.Z == 0) = nan;
 DEM = crop(DEM);
 
-% invert streams with a K. Note that these numbers are arbitrary
+% invert streams
+[A,Umod,S,Schi,chi_steps] = linear_inversion_block_uplift(DEM,'n_inc',10);
+
+% example of how to convert from nondimentional to natural units and plot
+% Note that the K value is arbitrary
 K = 5e-6;
-tau_inc = 1e5;
-[A,U,S,Stau,tau_steps] = linear_inversion_block_uplift_erodibility(DEM,K,tau_inc);
+Ao = 1;
+mn = 0.5;
+
+figure(99)
+stairs(chi_steps./(K*Ao^mn)./1e6,Umod.*(K*Ao^mn).*1000);
+xlabel('\tau (Myr)'); ylabel('Uplift rate (mm/yr)');

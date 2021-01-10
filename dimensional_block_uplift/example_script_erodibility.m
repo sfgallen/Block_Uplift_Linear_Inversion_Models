@@ -3,7 +3,7 @@ clear
 clc
 
 % add path to topotoolbox folder
-addpath(genpath('C:\Users\sfgallen\Documents\topo_toolbox\topotoolbox-2.2'));
+addpath(genpath('C:\Users\sfgallen\Documents\topo_toolbox\topotoolbox-master'));
 
 %% Load a DEM as a topotoolbox GRIDobj
 % load clipped watershed-scale DEM as a gridobj
