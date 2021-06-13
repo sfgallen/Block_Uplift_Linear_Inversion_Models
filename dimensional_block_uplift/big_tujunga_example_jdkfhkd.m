@@ -18,6 +18,7 @@ FD = FLOWobj(DEM);
 % define stream network and largest connected component
 S = STREAMobj(FD,'minarea',1e6/(DEM.cellsize)^2);
 S = klargestconncomps(S,1);
+S = trunk(S);
 
 % find the outlet of the stream 
 Sout = streampoi(S,'outlets','ix');
@@ -27,15 +28,27 @@ DB = drainagebasins(FD,Sout);
 DEM.Z(DB.Z == 0) = nan;
 DEM = crop(DEM);
 
-% invert streams
-[A,Umod,S,Schi,chi_steps] = linear_inversion_block_uplift(DEM,'n_inc',10,'mn',0.45);
-
-% example of how to convert from nondimentional to natural units and plot
-% Note that the K value is arbitrary
+% invert streams with a K. Note that these numbers are arbitrary
 K = 5e-6;
-Ao = 1;
-mn = 0.5;
+tau_inc = 2e5;
+[A,U,S,Stau,tau_steps] = linear_inversion_block_uplift_erodibility(DEM,K,tau_inc);
 
-figure(99)
-stairs(chi_steps./(K*Ao^mn)./1e6,Umod.*(K*Ao^mn).*1000);
-xlabel('\tau (Myr)'); ylabel('Uplift rate (mm/yr)');
+Sz = DEM.Z(S.IXgrid);
+Sz = sortrows(Sz)-min(Sz);
+t = sortrows(Stau);
+figure
+subplot(2,1,1)
+plot(t./1e6,A*U,'k-','linewidth',3); hold on
+plot(t./1e6,Sz,'g-','linewidth',2)
+legend('modeled','observed')
+xlabel('Distance');
+ylabel('Elevation')
+
+Szs = movmean(Sz,100);
+slo = (Szs(2:end)-Szs(1:end-1))./(t(2:end)-t(1:end-1));
+
+subplot(2,1,2)
+stairs(tau_steps./1e6,U.*1000,'color',[0 0 0],'lineWidth',3); hold on
+plot(t(1:end-1)./1e6,slo.*1000,'g.')
+xlabel('Distance'); ylabel('Slope');
+legend('modeled','observed')

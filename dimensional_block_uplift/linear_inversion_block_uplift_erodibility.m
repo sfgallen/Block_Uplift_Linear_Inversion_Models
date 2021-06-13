@@ -75,6 +75,7 @@ DA = flowacc(FD).*(FD.cellsize^2);
 % Create stream network object (S)
 S  = STREAMobj(FD,'minarea',crita/(cs)^2);
 S = klargestconncomps(S,1);
+%S = trunk(S);
 
 Sz = DEM.Z(S.IXgrid);
 
