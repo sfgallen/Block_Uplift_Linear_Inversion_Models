@@ -16,7 +16,7 @@ The codes in the “nondimensional_block_uplift” folder follow Goren et al.’
 
 The codes in the “dimensional_block_uplift” folder require an input erodibility, K, parameter to convert chi to the river response time, tau, and derive uplift rates in natural units.
 
-Both master functions have help menus, and users are directed to Goren et al. (2014), Gallen (2018), and Pavano and Gallen (in review) for details on the methodology and example applications. Please cite the above mentioned studies if these codes are used for research.
+Both master functions have help menus, and users are directed to Goren et al. (2014), Gallen (2018), and Pavano and Gallen (2021) for details on the methodology and example applications. Please cite the above mentioned studies if these codes are used for research.
 
 Contact:
 sean.gallen[at]colostate[dot]edu
@@ -27,7 +27,7 @@ Gallen, S.F., 2018. Lithologic controls on landscape dynamics and aquatic specie
 
 Goren, L., Fox, M. and Willett, S.D., 2014. Tectonics from fluvial topography using formal linear inversion: Theory and applications to the Inyo Mountains, California. Journal of Geophysical Research: Earth Surface, 119(8), pp.1651-1681.
 
-Pavano and Gallen, in review. A Geomorphic Examination of the Calabrian Forearc Translation: for consideration in Tectonics.
+Pavano and Gallen, 2021. A Geomorphic Examination of the Calabrian Forearc Translation: Tectonics, 40, e2020TC006692. https://doi.org/10.1029/2020TC006692
 
 Schwanghart, W. and Scherler, D., 2014. TopoToolbox 2–MATLAB-based software for topographic analysis and modeling in Earth surface sciences. Earth Surface Dynamics, 2(1), pp.1-7.
 
