@@ -28,7 +28,7 @@ DEM.Z(DB.Z == 0) = nan;
 DEM = crop(DEM);
 
 % invert streams
-[A,Umod,S,Schi,chi_steps] = linear_inversion_block_uplift(DEM,'n_inc',10,'mn',0.45);
+[A,Umod,S,Schi,chi_steps,res] = linear_inversion_block_uplift(DEM,'n_inc',10,'mn',0.45);
 
 % example of how to convert from nondimentional to natural units and plot
 % Note that the K value is arbitrary
@@ -39,3 +39,5 @@ mn = 0.5;
 figure(99)
 stairs(chi_steps./(K*Ao^mn)./1e6,Umod.*(K*Ao^mn).*1000);
 xlabel('\tau (Myr)'); ylabel('Uplift rate (mm/yr)');
+
+

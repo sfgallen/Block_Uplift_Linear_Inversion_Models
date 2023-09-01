@@ -1,34 +1,39 @@
-function [A,Umod,S,Schi,chi_steps,res] = linear_inversion_block_uplift(DEM,varargin)
-% Block uplift inversion code after Goren et al. (2014) JGR-Earth Surface.
+function [Ksn_Inv] = linear_inversion_ksn(DEM,varargin)
+% X-z inversion for ksn after Goren et al. (2014) and Gallen (2018).
 % Inputs:
 %       (1) DEM clipped to a watershed as a TopoToolbox GRIDobj
 %       (2) crita - critical drainage area for channel head initiation in
 %           m^2 (default = 1e6)
 %       (3) mn - the m over n ratio (concavity) of river system (default =
 %           0.5)
-%       (4) Ao - reference drainage area for chi-integration (default =
-%           1)
-%       (5) n_inc - number of time increments solved for in inversion
+%       (4) chi_inc - chi binning increment size solved for in inversion
+%           (default = 1)
+%       (5) gam - Gamma is a dampening coefficient - higher values result 
+%           in more smoothing. If a value of -1 is used, this code will use
+%           an L-curve optimazation scheme to find the proper coefficient.
 %           (default = 10)
 %       (6) flowOption: string of 'fill' or 'carve' for flow routing.
 %          (optional) {default --> empty assumes that DEM is already 
 %          filled or carved}
 %
 % Outputs:
-%       (1) A - forward model matrix
-%       (2) Umod - recovered uplift history
-%       (3) S - topotoolbox STREAMobj
-%       (4) Schi - chi of the stream network
-%       (5) chi_steps - increments of chi used in inversion
-%       (6) res - resolution matrix
+%       A single matlab data structure Ksn_Inv that contains
+%       (1) Ksn_Inv.A - forward model matrix
+%       (2) Ksn_Inv.ksn - chi-average ksn
+%       (3) Ksn_Inv.S - topotoolbox STREAMobj
+%       (4) Ksn_Inv.Sz - elevation of network relative to outlet elevation
+%       (5) Ksn_Inv.Schi - chi of the stream network
+%       (6) Ksn_Inv.chi_steps - increments of chi used in inversion
+%       (7) Ksn_Inv.res - resolution matrix
+%       (8) Ksn_Inv.gam - gamma 
 %
 % Author: Sean F. Gallen
-% Date Modified: 12/11/2020
+% Date Modified: 09/01/2023
 % email: sean.gallen[at]colostate.edu
 
 %%Parse Inputs
 p = inputParser;         
-p.FunctionName = 'linear_inversion_block_uplift';
+p.FunctionName = 'linear_inversion_ksn';
 
 % required inputs
 addRequired(p,'DEM', @(x) isa(x,'GRIDobj'));
@@ -36,16 +41,16 @@ addRequired(p,'DEM', @(x) isa(x,'GRIDobj'));
 % optional inputs
 addOptional(p,'crita', 1e6, @(x) isscalar(x));
 addOptional(p,'mn', 0.5, @(x) isscalar(x));
-addOptional(p,'Ao', 1, @(x) isscalar(x));
-addOptional(p,'n_inc', 10, @(x) isscalar(x));
+addOptional(p,'chi_inc', 1, @(x) isscalar(x));
+addOptional(p,'gam', 10, @(x) isscalar(x));
 addOptional(p,'flowOption', []);
 
 parse(p,DEM, varargin{:});
 DEM   = p.Results.DEM;
 crita = p.Results.crita;
 mn = p.Results.mn;
-Ao = p.Results.Ao;
-n_inc = p.Results.n_inc;
+chi_inc= p.Results.chi_inc;
+gam = p.Results.gam;
 
 %% Process grids
 % set nan values if it hasn't already been done
@@ -75,103 +80,85 @@ DA = flowacc(FD).*(FD.cellsize^2);
 S  = STREAMobj(FD,'minarea',crita/(cs)^2);
 S = klargestconncomps(S,1);
 
-Sz = DEM.Z(S.IXgrid);
+Sz = DEM.Z(S.IXgrid)-min(DEM.Z(S.IXgrid));
 
-Schi = MakeChiNetwork(S,DA,mn,Ao);
-
-%% coding Goren et al., 2014 block uplift inversion model
-% sort by elevation
-table = sortrows([Sz,Schi]);
-z_vec = table(:,1)-min(table(:,1));
-chi_vec = table(:,2);
-
-n = length(z_vec);  % number of nodes
+% calculate chi
+Sa = DA.Z(S.IXgrid);
+a = Sa.^-mn;
+Schi = cumtrapz(S,a);
 
 % define desired time increments.
-min_chi = floor(min(chi_vec));
-max_chi = ceil(max(chi_vec));
+min_chi = floor(min(Schi));
+max_chi = ceil(max(Schi));
+
+if chi_inc > max_chi
+    error(['Error: Your Tau increment is larger than the maximum Tau. ',...
+        'The maximum chi is: ', num2str(max_chi),' years. Reduce the the increment',...
+        'so that you have ~5 to 10 chi increments between 0 and the maximum chi value.']);
+end
 
 % make time vector
-inc_chi = (max_chi-min_chi)/n_inc;
-chi_steps = min_chi:inc_chi:max_chi; % time steps
+chi_steps = min_chi:chi_inc:max_chi; % chi steps
 q = length(chi_steps);
+n = length(Sz);  % number of nodes
 
 % load the time matrix with data
 A = zeros(n,q);
 for i = 2:q
     inc_chi_t=chi_steps(i)-chi_steps(i-1);
-    A(chi_vec >= chi_steps(i),i-1) = inc_chi_t;
+    A(Schi >= chi_steps(i),i-1) = inc_chi_t;
 end
 for i = 1:n
     loc_sum = sum(A(i,:));
     loc = find(A(i,:)==0,1);
-    A(i,loc) = chi_vec(i) - loc_sum; %this is the reminder
+    A(i,loc) = Schi(i) - loc_sum; %this is the reminder
 end
 
-% calculate Upri
-ZoverAsum = z_vec./sum(A,2);
-ZoverAsum(ZoverAsum == Inf) = nan;
-Upri = ones(q,1)*(1/n)*nansum(ZoverAsum);
+ % calculate ksn_pri
+ksn_pri = ones(q,1)*(max(Sz)./max(Schi));
 
 % make q by q identity matrix
 I = eye(q,q);
 
-% impose dampening (e.g. smoothing) parameter, (Gamma)
-Gam = logspace(-2,5,1000);
+if gam == -1
+    % impose dampening (e.g. smoothing) parameter, (Gamma)
+    Gam = logspace(-2,5,1000);
+    
+    % find the best-fit Gamma
+    MisFit = nan(1,length(Gam));
+    
+    for i = 1:length(Gam)
+        % now we can invert to find U following Goren from Tarantola, 1987
+        ksn_mod = ksn_pri + (A'*A + Gam(i)^2*I)\A'*(Sz-A*ksn_pri);
+        MisFit(i) = (1/(n-q))*sqrt(sum((Sz - A*ksn_mod).^2));
+    end
+    
+    [ind,~] = turingPointFinder(1./Gam,MisFit);
 
-%% find the best-fit Gamma and plot results
-cols = jet(length(Gam));
-MisFit = nan(1,length(Gam));
-
-figure()
-subplot(2,2,1)
-for i = 1:length(Gam)
-    % now we can invert to find U following Goren from Tarantola, 1987
-    Umod = Upri + (A'*A + Gam(i)^2*I)\A'*(z_vec-A*Upri);
-%     subplot(2,1,1);
-%     stairs(chi_steps,Umod,'color',cols(i,:),'lineWidth',0.5); hold on
-    MisFit(i) = (1/(n-q))*sqrt(sum((z_vec - A*Umod).^2));
-    %subplot(2,1,2)
-    plot(1./Gam(i),MisFit(i),'.','color',cols(i,:)); hold on
+    % define best-fit Gamma
+    Gam = Gam(ind);
+    disp(['Best fit Gamma = ',str2num(Gam)]);
+else
+    Gam = gam;
 end
 
-[ind,~] = turingPointFinder(1./Gam,MisFit);
-%subplot(2,1,2)
-plot(1/Gam(ind),MisFit(ind),'ko');
-xlabel('1/\Gamma'); ylabel('normalized misfit');
-
-% define best-fit Gamma and do the final inversion
-Gam = Gam(ind);
-
 %% invert for uplift history with best damping factor
-Umod = Upri + (A'*A + Gam^2*I)\A'*(z_vec-A*Upri);
+ksn_mod = ksn_pri + (A'*A + Gam^2*I)\A'*(Sz-A*ksn_pri);
 
-% plot uplift results
-subplot(2,2,2)
-% incremental uplift
-stairs(chi_steps,Umod,'color',[0 0 0],'lineWidth',2); hold on
-xlabel('\chi'); ylabel('U*');
-
-% cummulative uplift
-upWRTtime = cumtrapz(chi_steps,Umod);
-subplot(2,2,4)
-stairs(chi_steps,upWRTtime,'color',[0 0 0],'lineWidth',1); hold on
-xlabel('\chi'); ylabel('total baselevel fall(m)');
-
-% plot observed and best-fit model results
-subplot(2,2,3)
-plot(chi_vec,z_vec,'.','color',[0.5 0.5 0.5]); hold on
-plot(chi_vec,A*Umod,'k.');%,'color',Pcols(k,:));
-xlabel('\chi'); ylabel('elevation (m)')
-legend({'observed','modeled'});
-
-% calculate and plot resolution
+% calculate the resolution
 denom = (A'*A + Gam^2*I);
 res = (denom\A')*A;
-figure
-image(res,'CDataMapping','scaled')
-title('Resolution');
-colorbar
+
+% Pack relevant results into structured array
+Ksn_Inv.A = A;
+Ksn_Inv.ksn_mod = ksn_mod;
+Ksn_Inv.S = S;
+Ksn_Inv.Schi = Schi;
+Ksn_Inv.Sz = Sz;
+Ksn_Inv.chi_steps = chi_steps;
+Ksn_Inv.res = res;
+Ksn_Inv.gam = gam;
+
 end
 
 function [idx,perpDist] = turingPointFinder(x,y)
